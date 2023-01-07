@@ -6,14 +6,10 @@ import java.sql.SQLException;
 
 public interface UserDAO {
 
-    
+    ResultSet findById(String id) throws Exception;
 
-   
-     ResultSet findById(String id) throws Exception;
+    boolean insert(String id, String name, String password) throws Exception;
 
-boolean insert(String id, String name, String password) throws Exception;    
-    ResultSet findByUsernameAndPassword(String name,String password)throws Exception;
-
-    
+    ResultSet findByUsernameAndPassword(String name, String password) throws Exception;
 
 }
