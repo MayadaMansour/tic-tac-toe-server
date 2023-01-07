@@ -2,17 +2,18 @@ package tictacteo_server.data;
 
 import TicTacToeCommon.models.UserModel;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public interface UserDAO {
 
-    ResultSet getForId(String id);
+    
 
-    public int delete(String id);
+   
+     ResultSet findById(String id) throws Exception;
 
-    public UserModel findById(String id);
+boolean insert(String id, String name, String password) throws Exception;    
+    ResultSet findByUsernameAndPassword(String name,String password)throws Exception;
 
-    public int insert(UserModel user);
-
-    public int update(UserModel user);
+    
 
 }
