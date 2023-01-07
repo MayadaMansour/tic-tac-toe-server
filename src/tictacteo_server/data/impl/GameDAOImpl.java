@@ -5,7 +5,6 @@
  */
 package tictacteo_server.data.impl;
 
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,19 +19,17 @@ import tictacteo_server.data.GameDAO;
 public class GameDAOImpl implements GameDAO{
     
     private DatabaseManager databaseManager;
-    private Connection connection;
-    private PreparedStatement statement;
     
     public GameDAOImpl(DatabaseManager databaseManager) throws Exception{
         this.databaseManager = databaseManager;
-        connection = databaseManager.getConnection();
     }
 
     @Override
     public ResultSet getGameById(String id) throws SQLException{
         
         String queryString = "SELECT * FROM GAME WHERE ? = ?";
-        statement = connection.prepareStatement(queryString,ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
+        PreparedStatement statement = databaseManager.getConnection().prepareStatement(queryString,ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_UPDATABLE);
         statement.setString(1, "GAME");
         statement.setString(2, id);
         return statement.executeQuery();
@@ -42,7 +39,8 @@ public class GameDAOImpl implements GameDAO{
     public ResultSet getGamesByPlayerId(String id) throws SQLException{
         
         String queryString = "SELECT * FROM GAME WHERE PLAYER1 = ? OR PLAYER2 = ?";
-        statement = connection.prepareStatement(queryString,ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+        PreparedStatement statement = databaseManager.getConnection().prepareStatement(queryString,ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY);
         statement.setString(1, id);
         statement.setString(2, id);
         return statement.executeQuery();
@@ -53,7 +51,8 @@ public class GameDAOImpl implements GameDAO{
         String nextPlayerId) throws SQLException{
         
         String queryString = "INSERT INTO GAME (ID,PLAYER1,PLAYER2,STARTEDAT,NEXTPLAYER) VALUES(?,?,?,?,?)";
-        statement = connection.prepareStatement(queryString,ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
+        PreparedStatement statement = databaseManager.getConnection().prepareStatement(queryString,ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_UPDATABLE);
         statement.setString(1, gameId);
         statement.setString(2, player1Id);
         statement.setString(3, player2Id);
@@ -63,9 +62,5 @@ public class GameDAOImpl implements GameDAO{
         return statement.executeQuery();
     }
     
-    @Override
-    public void closeStatement()throws SQLException{
-        statement.close();
-    }
     
 }

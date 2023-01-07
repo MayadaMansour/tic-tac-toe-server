@@ -28,14 +28,9 @@ public class GameMapper implements EntityMapper<GameModel>{
     @Override
     public void writeToSet(GameModel entity, ResultSet resultSet) throws SQLException {
         
-        String gameId = entity.getGameId();
-        String player1Id = entity.getPlayer1Id();
-        String player2Id = entity.getPlayer2Id();
-        
-        resultSet.updateString(1, gameId);
-        resultSet.updateString(2, player1Id);
-        resultSet.updateString(3, player2Id);
-        resultSet.updateRow();
+        resultSet.updateString(1, entity.getGameId());
+        resultSet.updateString(2, entity.getPlayer1Id());
+        resultSet.updateString(3, entity.getPlayer2Id());
     }
     
 }

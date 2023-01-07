@@ -17,6 +17,6 @@ public interface GameDAO {
     
     ResultSet getGamesByPlayerId(String id) throws SQLException;
     
-    void closeStatement() throws SQLException;
+   
     
 }
