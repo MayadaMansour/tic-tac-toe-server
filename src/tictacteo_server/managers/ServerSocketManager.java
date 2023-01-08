@@ -1,7 +1,7 @@
 package tictacteo_server.managers;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 public interface ServerSocketManager {
 
@@ -9,11 +9,11 @@ public interface ServerSocketManager {
 
     GamesManager getGamesManager();
 
-    <T> Future<T> submitJob(Supplier<T> job);
+    <T> Future<T> submitJob(Callable<T> job);
 
     Future<?> submitJob(Runnable job);
 
-    void start() throws Exception;
+    Future<?> start() throws Exception;
 
-    void stop() throws Exception;
+    Future<?> stop() throws Exception;
 }
