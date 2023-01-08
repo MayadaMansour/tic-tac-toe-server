@@ -5,13 +5,14 @@
 package tictacteo_server.data;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 
 public interface DatabaseManager {
 
-    void start() throws Exception;
+    void start() throws SQLException;
 
-    Connection getConnection() throws Exception;
+    Connection getConnection() throws SQLException;
 
-    void stop() throws Exception;
+    void stop() throws SQLException;
 }
