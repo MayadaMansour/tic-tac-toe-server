@@ -5,7 +5,6 @@
  */
 package tictacteo_server.data.impl;
 
-
 import TicTacToeCommon.models.MoveModel;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -62,6 +61,5 @@ public class MoveDAOImpl implements MoveDAO {
          return id;
  
      }
-
 
 }

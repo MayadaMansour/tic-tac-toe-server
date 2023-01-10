@@ -17,7 +17,7 @@ public interface GamesManager {
     
     void setOngoingHandler(GameHandler handler);
     
-    void removeHandler(ClientHandler handler);
+    void removeHandler(GameHandler handler);
     
     void stop() throws Exception;
     
