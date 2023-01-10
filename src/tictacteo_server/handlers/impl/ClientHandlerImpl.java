@@ -4,10 +4,34 @@
  */
 package tictacteo_server.handlers.impl;
 
+import java.io.Serializable;
 import tictacteo_server.handlers.ClientHandler;
 
 
-public abstract class ClientHandlerImpl implements ClientHandler {
+public  class ClientHandlerImpl implements ClientHandler {
+
+    @Override
+    public void send(Serializable data) throws Exception {
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        return false;
+    }
+
+    @Override
+    public boolean isPlaying() {
+        return false;
+    }
+
+    @Override
+    public Object getUser() {
+        return null;
+    }
+
+    @Override
+    public void stop() throws Exception {
+    }
 
     
 }
