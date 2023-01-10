@@ -11,15 +11,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Represents a Singleton class of a DerbyDatabaseManager
- * that is thread and reflection safe but not serialization safe.
- *
- * @author Moustafa
- * @author Karim
- * @version 1.0
- * @since 1.0
- * */
+
 public class DerbyDatabaseManager implements DatabaseManager, Serializable {
 
     private static DerbyDatabaseManager instance;
