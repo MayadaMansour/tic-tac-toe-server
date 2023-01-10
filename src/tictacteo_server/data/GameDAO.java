@@ -10,12 +10,12 @@ import java.sql.SQLException;
  */
 public interface GameDAO {
     
-    ResultSet createGame(String gameId,String player1Id,String player2Id,Date startingDate,
+    int createGame(String gameId,String player1Id,String player2Id,Date startingDate,
             String nextPlayerId) throws SQLException;
             
-    ResultSet getGameById(String id) throws SQLException;
+    ResultPacket getGameById(String id) throws SQLException;
     
-    ResultSet getGamesByPlayerId(String id) throws SQLException;
+    ResultPacket getGamesByPlayerId(String id) throws SQLException;
     
    
     
