@@ -53,7 +53,12 @@ public class MoveDAOImpl implements MoveDAO {
          ps.setString(2, moveModel.getGameId());
          ps.setByte(3,moveModel.getSpacePosition());
          ps.setDate(4, (Date) moveModel.getCreatedAt());
-         return moveModel.getPlayerId();
+         int rows = ps.executeUpdate();
+         ResultSet keys = ps.getGeneratedKeys();
+         String id = keys.getString("id");
+         ps.close();
+         keys.close();
+          return id;
  
      }
 
