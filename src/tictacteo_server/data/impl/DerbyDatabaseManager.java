@@ -35,7 +35,6 @@ public class DerbyDatabaseManager implements DatabaseManager, Serializable {
 
     @Override
     public void start() throws SQLException {
-
         if(connection == null){
             connection = DriverManager.getConnection(DerbyDatabaseManager.DATABASE_URL,DerbyDatabaseManager.USERNAME
             ,DerbyDatabaseManager.PASSWORD);

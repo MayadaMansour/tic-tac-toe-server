@@ -20,23 +20,21 @@ public class MoveMapper implements EntityMapper<MoveModel> {
     @Override
     public MoveModel mapToEntity(ResultSet resultSet) throws SQLException {
         MoveModel moveModel = new MoveModel();
-        moveModel.setPlayerId(resultSet.getString("playerId"));
+        moveModel.setId(resultSet.getString("id"));
         moveModel.setGameId(resultSet.getString("gameId"));
+        moveModel.setPlayerId(resultSet.getString("playerId"));
         moveModel.setSpacePosition(resultSet.getByte("spacePosition"));
-        moveModel.setCreatedAt(resultSet.getDate("createdAt"));
+        moveModel.setCreatedAt(resultSet.getLong("createdAt"));
         return moveModel;
     }
 
     @Override
     public void writeToSet(MoveModel entity, ResultSet resultSet) throws SQLException {
-       resultSet.updateString("playerId", entity.getPlayerId());
-       resultSet.updateString("gameId", entity.getGameId());
-       resultSet.updateByte("spacePosition", entity.getSpacePosition());
-        if (entity.getCreatedAt() != null) {
-            Date createdAt = new Date(entity.getCreatedAt().getTime());
-            resultSet.updateDate("createdAt", createdAt);
-        } 
+        resultSet.updateString("id", entity.getId());
+        resultSet.updateString("playerId", entity.getPlayerId());
+        resultSet.updateString("gameId", entity.getGameId());
+        resultSet.updateByte("spacePosition", entity.getSpacePosition());
+        resultSet.updateLong("createdAt", entity.getCreatedAt());
     }
-    
-    
+
 }

@@ -5,7 +5,6 @@
 package tictacteo_server.mappers.impl;
 
 import TicTacToeCommon.models.UserModel;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import tictacteo_server.mappers.EntityMapper;
@@ -17,7 +16,7 @@ public class UserMapper implements EntityMapper<UserModel> {
         UserModel userModel = new UserModel();
         userModel.setId(resultSet.getString("id"));
         userModel.setName(resultSet.getString("username"));
-        userModel.setCreatedAt(resultSet.getDate("createdAt"));
+        userModel.setCreatedAt(resultSet.getLong("createdAt"));
         return userModel;
     }
 
@@ -25,9 +24,6 @@ public class UserMapper implements EntityMapper<UserModel> {
     public void writeToSet(UserModel entity, ResultSet resultSet) throws SQLException {
         resultSet.updateString("id", entity.getId());
         resultSet.updateString("username", entity.getName());
-        if (entity.getCreatedAt() != null) {
-            Date createdAt = new Date(entity.getCreatedAt().getTime());
-            resultSet.updateDate("createdAt", createdAt);
-        }
+        resultSet.updateLong("createdAt", entity.getCreatedAt());
     }
 }

@@ -47,19 +47,16 @@ public class MoveDAOImpl implements MoveDAO {
     @Override
     public String createMove(MoveModel moveModel) throws SQLException {
         String INSERT_MOVE_SQL = "INSERT INTO MOVE(playerId, gameId, spacePosition, createdAt) VALUES(?,?,?,?) ";
-        // TODO add id to model
-        PreparedStatement ps = dbm.getConnection().prepareStatement(INSERT_MOVE_SQL, PreparedStatement.RETURN_GENERATED_KEYS);
-         ps.setString(1, moveModel.getPlayerId());
-         ps.setString(2, moveModel.getGameId());
-         ps.setByte(3,moveModel.getSpacePosition());
-         ps.setDate(4, (Date) moveModel.getCreatedAt());
-         int result = ps.executeUpdate();
-         ResultSet keys = ps.getGeneratedKeys();
-         String id = keys.getString("id");
-         ps.close();
-         keys.close();
-         return id;
- 
-     }
+        try ( // TODO add id to model
+                PreparedStatement ps = dbm.getConnection().prepareStatement(INSERT_MOVE_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, moveModel.getPlayerId());
+            ps.setString(2, moveModel.getGameId());
+            ps.setByte(3, moveModel.getSpacePosition());
+            ps.setLong(4, moveModel.getCreatedAt());
+            ps.executeUpdate();
+            ResultSet keys = ps.getGeneratedKeys();
+            return keys.getString("id");
+        }
+    }
 
 }
