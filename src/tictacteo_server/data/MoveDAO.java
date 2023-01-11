@@ -5,7 +5,7 @@
  */
 package tictacteo_server.data;
 
-
+import TicTacToeCommon.models.MoveModel;
 import java.sql.SQLException;
 
 /**
@@ -16,5 +16,5 @@ public interface MoveDAO {
 
     public abstract ResultPacket findMoveById (String id)throws SQLException;
     public abstract ResultPacket findMoveByGameId (String gameId) throws SQLException;
-    
+    public abstract String createMove(MoveModel moveModel) throws SQLException; 
 }

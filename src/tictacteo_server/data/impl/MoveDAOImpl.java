@@ -5,7 +5,8 @@
  */
 package tictacteo_server.data.impl;
 
-
+import TicTacToeCommon.models.MoveModel;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,5 +44,22 @@ public class MoveDAOImpl implements MoveDAO {
         return new ResultPacket(result, ps);
     }
 
+    @Override
+    public String createMove(MoveModel moveModel) throws SQLException {
+        String INSERT_MOVE_SQL = "INSERT INTO MOVE(playerId, gameId, spacePosition, createdAt) VALUES(?,?,?,?) ";
+        // TODO add id to model
+        PreparedStatement ps = dbm.getConnection().prepareStatement(INSERT_MOVE_SQL, PreparedStatement.RETURN_GENERATED_KEYS);
+         ps.setString(1, moveModel.getPlayerId());
+         ps.setString(2, moveModel.getGameId());
+         ps.setByte(3,moveModel.getSpacePosition());
+         ps.setDate(4, (Date) moveModel.getCreatedAt());
+         int result = ps.executeUpdate();
+         ResultSet keys = ps.getGeneratedKeys();
+         String id = keys.getString("id");
+         ps.close();
+         keys.close();
+         return id;
+ 
+     }
 
 }
