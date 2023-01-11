@@ -28,7 +28,7 @@ public class MoveDAOImpl implements MoveDAO {
 
     @Override
     public ResultPacket findMoveById(String id) throws SQLException {
-        String SEARCH_MOVE_SQL = "SELECT INTO MOVE WHERE ID = ? ";
+        String SEARCH_MOVE_SQL = "SELECT INTO Moves WHERE Id = ? ";
         PreparedStatement ps = dbm.getConnection().prepareStatement(SEARCH_MOVE_SQL);
         ps.setString(1, id);
         ResultSet result = ps.executeQuery();
@@ -37,7 +37,7 @@ public class MoveDAOImpl implements MoveDAO {
 
     @Override
     public ResultPacket findMoveByGameId(String gameId) throws SQLException {
-        String SEARCH_MOVE_SQL = "SELECT INTO MOVE WHERE ID = ? ";
+        String SEARCH_MOVE_SQL = "SELECT INTO Moves WHERE Id = ? ";
         PreparedStatement ps = dbm.getConnection().prepareStatement(SEARCH_MOVE_SQL);
         ps.setString(1, gameId);
         ResultSet result = ps.executeQuery();
@@ -46,13 +46,14 @@ public class MoveDAOImpl implements MoveDAO {
 
     @Override
     public String createMove(MoveModel moveModel) throws SQLException {
-        String INSERT_MOVE_SQL = "INSERT INTO MOVE(playerId, gameId, spacePosition, createdAt) VALUES(?,?,?,?) ";
-        try ( // TODO add id to model
+        String INSERT_MOVE_SQL = "INSERT INTO Moves(Id, PlayerId, GameId, SpacePosition, CreatedAt) VALUES(?,?,?,?,?) ";
+        try (
                 PreparedStatement ps = dbm.getConnection().prepareStatement(INSERT_MOVE_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, moveModel.getPlayerId());
-            ps.setString(2, moveModel.getGameId());
-            ps.setByte(3, moveModel.getSpacePosition());
-            ps.setLong(4, moveModel.getCreatedAt());
+            ps.setString(1, moveModel.getId());
+            ps.setString(2, moveModel.getPlayerId());
+            ps.setString(3, moveModel.getGameId());
+            ps.setByte(4, moveModel.getSpacePosition());
+            ps.setLong(5, moveModel.getCreatedAt());
             ps.executeUpdate();
             ResultSet keys = ps.getGeneratedKeys();
             if (keys.next()) {
