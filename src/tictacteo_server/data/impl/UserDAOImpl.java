@@ -46,7 +46,10 @@ public class UserDAOImpl implements UserDAO {
             preparedStmt.setObject(4, user.getCreatedAt());
             preparedStmt.executeUpdate();
             ResultSet keys = preparedStmt.getGeneratedKeys();
-            return keys.getString("id");
+            if (keys.next()) {
+                return keys.getString("id");
+            }
+            return null;
         }
     }
 

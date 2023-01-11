@@ -24,7 +24,7 @@ import tictacteo_server.managers.ClientsManager;
 import tictacteo_server.managers.GamesManager;
 import tictacteo_server.managers.ServerSocketManager;
 
-public abstract class GamesManagerImpl implements GamesManager {
+public class GamesManagerImpl implements GamesManager {
 
     private final ServerSocketManager serverSocketManager;
     private final List<PendingRequest> pendingRequests = new LinkedList<>();
