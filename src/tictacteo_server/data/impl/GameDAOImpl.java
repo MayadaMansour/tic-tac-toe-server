@@ -1,6 +1,6 @@
-
 package tictacteo_server.data.impl;
 
+import TicTacToeCommon.models.GameModel;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,53 +15,45 @@ import tictacteo_server.data.ResultPacket;
  * @version 1.1
  * @since 1.0
  */
-public class GameDAOImpl implements GameDAO{
-    
+public class GameDAOImpl implements GameDAO {
+
     private final DatabaseManager databaseManager;
-    
-    public GameDAOImpl(DatabaseManager databaseManager) throws Exception{
+
+    public GameDAOImpl(DatabaseManager databaseManager) throws Exception {
         this.databaseManager = databaseManager;
     }
 
     @Override
-    public ResultPacket getGameById(String id) throws SQLException{
-        
+    public ResultPacket getGameById(String id) throws SQLException {
         String queryString = "SELECT * FROM GAME WHERE ? = ?";
-        PreparedStatement statement = databaseManager.getConnection().prepareStatement(queryString,ResultSet.TYPE_FORWARD_ONLY,
+        PreparedStatement statement = databaseManager.getConnection().prepareStatement(queryString, ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE);
         statement.setString(1, "GAME");
         statement.setString(2, id);
-        
-        return new ResultPacket(statement.executeQuery(),statement);
+        return new ResultPacket(statement.executeQuery(), statement);
     }
 
     @Override
-    public ResultPacket getGamesByPlayerId(String id) throws SQLException{
-        
+    public ResultPacket getGamesByPlayerId(String id) throws SQLException {
         String queryString = "SELECT * FROM GAME WHERE PLAYER1 = ? OR PLAYER2 = ?";
-        PreparedStatement statement = databaseManager.getConnection().prepareStatement(queryString,ResultSet.TYPE_FORWARD_ONLY,
+        PreparedStatement statement = databaseManager.getConnection().prepareStatement(queryString, ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_READ_ONLY);
         statement.setString(1, id);
         statement.setString(2, id);
-        
-        return new ResultPacket(statement.executeQuery(),statement);
+        return new ResultPacket(statement.executeQuery(), statement);
     }
 
     @Override
-    public int createGame(String gameId, String player1Id, String player2Id, Date startingDate, 
-        String nextPlayerId) throws SQLException{
-        
-        String queryString = "INSERT INTO GAME (ID,PLAYER1,PLAYER2,STARTEDAT,NEXTPLAYER) VALUES(?,?,?,?,?)";
-        PreparedStatement statement = databaseManager.getConnection().prepareStatement(queryString,ResultSet.TYPE_FORWARD_ONLY,
-                ResultSet.CONCUR_UPDATABLE);
-        statement.setString(1, gameId);
-        statement.setString(2, player1Id);
-        statement.setString(3, player2Id);
-        statement.setObject(4, startingDate);
-        statement.setString(5, nextPlayerId);
-        
-        return statement.executeUpdate();
+    public String createGame(GameModel game) throws SQLException {
+        String queryString = "INSERT INTO GAME (ID,PLAYER1,PLAYER2,STARTEDAT) VALUES(?,?,?,?)";
+        try (PreparedStatement statement = databaseManager.getConnection().prepareStatement(queryString, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, game.getGameId());
+            statement.setString(2, game.getPlayer1Id());
+            statement.setString(3, game.getPlayer2Id());
+            statement.setLong(4, game.getCreatedAt());
+            statement.executeUpdate();
+            ResultSet keys = statement.getGeneratedKeys();
+            return keys.getString("id");
+        }
     }
-    
-    
 }

@@ -4,6 +4,7 @@
  */
 package tictacteo_server.handlers;
 
+import TicTacToeCommon.models.UserModel;
 import java.io.Serializable;
 
 public interface ClientHandler {
@@ -14,7 +15,7 @@ public interface ClientHandler {
 
     boolean isPlaying();
 
-    Object getUser();
+    UserModel getUser();
 
     void stop() throws Exception;
 }

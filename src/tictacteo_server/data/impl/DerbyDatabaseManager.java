@@ -21,7 +21,7 @@ public class DerbyDatabaseManager implements DatabaseManager, Serializable {
     private final static String PASSWORD = "root";
 
     private DerbyDatabaseManager() throws SQLException {
-        DriverManager.registerDriver(new org.apache.derby.jdbc.ClientDriver());
+        // DriverManager.registerDriver(new org.apache.derby.jdbc.ClientDriver());
     }
 
     public static synchronized DerbyDatabaseManager getInstance() throws SQLException {

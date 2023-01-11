@@ -1,7 +1,6 @@
 package tictacteo_server.data;
 
-import java.sql.Date;
-import java.sql.ResultSet;
+import TicTacToeCommon.models.GameModel;
 import java.sql.SQLException;
 
 /**
@@ -10,13 +9,10 @@ import java.sql.SQLException;
  */
 public interface GameDAO {
     
-    int createGame(String gameId,String player1Id,String player2Id,Date startingDate,
-            String nextPlayerId) throws SQLException;
+    String createGame(GameModel game) throws SQLException;
             
     ResultPacket getGameById(String id) throws SQLException;
     
     ResultPacket getGamesByPlayerId(String id) throws SQLException;
-    
-   
     
 }
