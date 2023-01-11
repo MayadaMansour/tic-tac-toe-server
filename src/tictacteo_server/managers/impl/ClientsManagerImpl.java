@@ -4,16 +4,13 @@
  */
 package tictacteo_server.managers.impl;
 
-import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.String;
+import TicTacToeCommon.models.UserModel;
 import java.io.Serializable;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import tictacteo_server.handlers.ClientHandler;
 import tictacteo_server.managers.*;
 
@@ -22,11 +19,11 @@ public class ClientsManagerImpl implements ClientsManager {
     private final ArrayList<ClientHandler> activeClients = new ArrayList<>();
     private final Map<String, ClientHandler> authClients = new HashMap<>();
     private final ServerSocketManager socketManager;
-    
+
     public ClientsManagerImpl(ServerSocketManager socketManager) {
         this.socketManager = socketManager;
     }
-    
+
     @Override
     public void accept(Socket socket) {
         ClientHandler client = null;
@@ -39,6 +36,35 @@ public class ClientsManagerImpl implements ClientsManager {
         if (client != null) {
             client.send(data);
         }
+    }
+
+    @Override
+    public boolean isAvailableToPlay(String userId) {
+        ClientHandler handler = authClients.get(userId);
+        return handler != null && !handler.isPlaying();
+    }
+
+    @Override
+    public boolean isOnline(String userId) {
+        ClientHandler handler = authClients.get(userId);
+        return handler != null;
+    }
+
+    @Override
+    public ArrayList<UserModel> getAvailablePlayers() {
+        return authClients.values().stream()
+                .filter((e) -> !e.isPlaying())
+                .map((e) -> e.getUser())
+                .collect(Collectors.toCollection(() -> new ArrayList<>()));
+    }
+
+    @Override
+    public UserModel getUser(String userId) {
+        ClientHandler handler = authClients.get(userId);
+        if (handler != null) {
+            return handler.getUser();
+        }
+        return null;
     }
 
     @Override
@@ -64,4 +90,5 @@ public class ClientsManagerImpl implements ClientsManager {
         }
         activeClients.clear();
     }
+
 }

@@ -5,7 +5,6 @@
 package tictacteo_server.managers;
 
 import java.io.Serializable;
-import tictacteo_server.handlers.ClientHandler;
 import tictacteo_server.handlers.GameHandler;
 
 
