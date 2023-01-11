@@ -1,7 +1,6 @@
 package tictacteo_server.data.impl;
 
 import TicTacToeCommon.models.GameModel;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +18,7 @@ public class GameDAOImpl implements GameDAO {
 
     private final DatabaseManager databaseManager;
 
-    public GameDAOImpl(DatabaseManager databaseManager) throws Exception {
+    public GameDAOImpl(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
     }
 
@@ -53,7 +52,10 @@ public class GameDAOImpl implements GameDAO {
             statement.setLong(4, game.getCreatedAt());
             statement.executeUpdate();
             ResultSet keys = statement.getGeneratedKeys();
-            return keys.getString("id");
+            if (keys.next()) {
+                return keys.getString("id");
+            }
+            return null;
         }
     }
 }

@@ -10,6 +10,8 @@ public interface GameHandler {
 
     String getGameId();
     
+    String[] getPlayersIds();
+    
     boolean canProcess(String userId, Serializable data);
 
     void process(String userId, Serializable data) throws Exception;

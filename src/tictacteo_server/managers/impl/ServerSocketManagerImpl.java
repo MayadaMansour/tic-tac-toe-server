@@ -3,12 +3,14 @@ package tictacteo_server.managers.impl;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import tictacteo_server.managers.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import tictacteo_server.data.DatabaseManager;
+import tictacteo_server.data.impl.DerbyDatabaseManager;
 
 public class ServerSocketManagerImpl implements ServerSocketManager {
 
@@ -18,10 +20,10 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
     private final DatabaseManager databaseManager;
     private ServerSocket server;
 
-    public ServerSocketManagerImpl(GamesManager GamesManager, ClientsManager ClientsManager, DatabaseManager databaseManager) {
-        this.gamesManager = GamesManager;
-        this.clientsManager = ClientsManager;
-        this.databaseManager = databaseManager;
+    public ServerSocketManagerImpl() throws SQLException {
+        this.gamesManager = new GamesManagerImpl(this);
+        this.clientsManager = new ClientsManagerImpl(this);
+        this.databaseManager = DerbyDatabaseManager.getInstance();
     }
 
     @Override
@@ -34,6 +36,11 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
         return gamesManager;
     }
 
+    @Override
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+    
     @Override
     public <T> Future<T> submitJob(Callable<T> job) {
         return executorService.submit(job);
@@ -72,4 +79,5 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
             return 0;
         });
     }
+
 }

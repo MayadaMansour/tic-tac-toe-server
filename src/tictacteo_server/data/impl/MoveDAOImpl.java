@@ -55,7 +55,10 @@ public class MoveDAOImpl implements MoveDAO {
             ps.setLong(4, moveModel.getCreatedAt());
             ps.executeUpdate();
             ResultSet keys = ps.getGeneratedKeys();
-            return keys.getString("id");
+            if (keys.next()) {
+                return keys.getString("id");
+            }
+            return null;
         }
     }
 
