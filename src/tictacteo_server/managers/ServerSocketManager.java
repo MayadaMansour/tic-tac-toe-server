@@ -1,11 +1,18 @@
 package tictacteo_server.managers;
 
+import TicTacToeCommon.utils.ObservableValue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import tictacteo_server.data.DatabaseManager;
 
 public interface ServerSocketManager {
 
+    ObservableValue<Long> getActiveUsers();
+    
+    ObservableValue<Long> getAllUsers();
+    
+    ObservableValue<Boolean> getServerStatus();
+    
     ClientsManager getClientsManager();
 
     GamesManager getGamesManager();
@@ -19,4 +26,5 @@ public interface ServerSocketManager {
     Future<?> start() throws Exception;
 
     Future<?> stop() throws Exception;
+
 }

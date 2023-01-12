@@ -46,22 +46,25 @@ public class GameHandlerImpl implements GameHandler {
         startGame(player1, player2);
     }
 
-    private void startGame(UserModel player1, UserModel player2) throws Exception {
+    private void startGame(UserModel player1, UserModel player2) {
         serverSocketManager.getClientsManager().send(player1.getId(),
                 new GameEvent.Started(gameModel.getGameId(), gameModel,
                         player2, engine.getLeague(player1.getId())));
+        serverSocketManager.getClientsManager().setIsPlaying(player1.getId(), true);
         serverSocketManager.getClientsManager().send(player2.getId(),
                 new GameEvent.Started(gameModel.getGameId(), gameModel,
                         player1, engine.getLeague(player2.getId())));
+        serverSocketManager.getClientsManager().setIsPlaying(player2.getId(), true);
+
     }
 
-    private void broadcast(GameEvent event) throws Exception {
+    private void broadcast(GameEvent event) {
         for (String userId : players) {
             send(userId, event);
         }
     }
 
-    private void sendToOpponent(String playerId, GameEvent event) throws Exception {
+    private void sendToOpponent(String playerId, GameEvent event) {
         for (String userId : players) {
             if (!Objects.equals(playerId, userId)) {
                 send(userId, event);
@@ -70,7 +73,7 @@ public class GameHandlerImpl implements GameHandler {
         }
     }
 
-    private void send(String playerId, RemoteSendable event) throws Exception {
+    private void send(String playerId, RemoteSendable event) {
         serverSocketManager.getClientsManager().send(playerId, event);
     }
 
@@ -100,7 +103,7 @@ public class GameHandlerImpl implements GameHandler {
     }
 
     @Override
-    public void process(String userId, Serializable data) throws Exception {
+    public void process(String userId, Serializable data) {
         if (data instanceof GameWithdrawRequest) {
             sendToOpponent(userId, new GameEvent.Withdraw(userId));
             send(userId, new GameWithdrawResponse(true, getGameId()));
@@ -123,7 +126,7 @@ public class GameHandlerImpl implements GameHandler {
         }
     }
 
-    private boolean checkEndGame(TicTacToeEngine.GameResult result) throws Exception {
+    private boolean checkEndGame(TicTacToeEngine.GameResult result) {
         if (result != ONGOING) {
             UserModel cross = engine.getPlayer(League.Cross);
             UserModel nougth = engine.getPlayer(League.Nought);
@@ -148,13 +151,16 @@ public class GameHandlerImpl implements GameHandler {
         return false;
     }
 
-    private void remove() throws Exception {
+    private void remove() {
+        for (String userId : players) {
+            serverSocketManager.getClientsManager().setIsPlaying(userId, false);
+        }
         serverSocketManager.getGamesManager().removeHandler(this);
         stop();
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         broadcast(new GameEvent.Ended(gameModel.getGameId()));
     }
 }

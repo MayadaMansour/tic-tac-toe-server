@@ -45,7 +45,7 @@ public class GamesManagerImpl implements GamesManager {
     }
 
     @Override
-    public void process(String userId, Serializable data) throws Exception {
+    public void process(String userId, Serializable data) {
         ClientsManager clientManager = serverSocketManager.getClientsManager();
         if (data instanceof GameCancelRequest) {
             GameCancelRequest cancelGameRequest = (GameCancelRequest) data;

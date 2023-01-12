@@ -12,7 +12,7 @@ import java.sql.Statement;
  *
  * @author m-essam
  */
-public class ResultPacket {
+public class ResultPacket implements AutoCloseable {
 
     private final Statement statement;
     private final ResultSet resultSet;

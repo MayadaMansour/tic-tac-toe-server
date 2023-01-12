@@ -7,25 +7,38 @@ package tictacteo_server.managers.impl;
 import TicTacToeCommon.models.UserModel;
 import TicTacToeCommon.models.base.RemoteSendable;
 import TicTacToeCommon.models.requests.GameWithdrawRequest;
+import TicTacToeCommon.utils.MutableObservableValue;
+import TicTacToeCommon.utils.ObservableValue;
 import java.io.Serializable;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import tictacteo_server.data.DatabaseManager;
+import tictacteo_server.data.ResultPacket;
+import tictacteo_server.data.UserDAO;
+import tictacteo_server.data.impl.DerbyDatabaseManager;
+import tictacteo_server.data.impl.UserDAOImpl;
 import tictacteo_server.handlers.ClientHandler;
 import tictacteo_server.managers.*;
 
 public class ClientsManagerImpl implements ClientsManager {
 
+    private final MutableObservableValue<Long> onlineUsers = new MutableObservableValue<>(0L);
+    private final MutableObservableValue<Long> totalUsers = new MutableObservableValue<>(0L);
     private final ArrayList<ClientHandler> activeClients = new ArrayList<>();
     private final Map<String, ClientHandler> authClients = new HashMap<>();
     private final ServerSocketManager socketManager;
+    private final UserDAO userDao;
 
-    public ClientsManagerImpl(ServerSocketManager socketManager) {
+    public ClientsManagerImpl(ServerSocketManager socketManager,DatabaseManager databaseManager)throws SQLException{
         this.socketManager = socketManager;
+        this.userDao = new UserDAOImpl(databaseManager);
+        this.totalUsers.setValue(userDao.getUsersCount());
     }
 
     @Override
@@ -72,20 +85,33 @@ public class ClientsManagerImpl implements ClientsManager {
     }
 
     @Override
-    public void authenticateHandler(String userId, ClientHandler handler) {
+    public void authenticateHandler(boolean isSignup, String userId, ClientHandler handler) {
         authClients.put(userId, handler);
+        onlineUsers.setValue(onlineUsers.getValue() + 1);
+        if (isSignup) {
+            totalUsers.setValue(totalUsers.getValue() + 1);
+        }
     }
 
     @Override
     public void unathenticateHandler(String userId) {
         authClients.remove(userId);
+        onlineUsers.setValue(onlineUsers.getValue() - 1);
         try {
             socketManager.getGamesManager().process(userId, new GameWithdrawRequest());
         } catch (Exception ex) {
             Logger.getLogger(ClientsManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
- 
+
+    @Override
+    public void setIsPlaying(String userId, boolean isPlaying) {
+        ClientHandler handler = authClients.get(userId);
+        if (handler != null) {
+            handler.setIsPlaying(isPlaying);
+        }
+    }
+
     @Override
     public void removeHandler(ClientHandler handler) {
         activeClients.remove(handler);
@@ -98,6 +124,17 @@ public class ClientsManagerImpl implements ClientsManager {
             handler.stop();
         }
         activeClients.clear();
+        onlineUsers.setValue(0L);
+    }
+
+    @Override
+    public ObservableValue<Long> getActiveUsers() {
+        return onlineUsers;
+    }
+
+    @Override
+    public ObservableValue<Long> getAllUsers() {
+        return totalUsers;
     }
 
 }

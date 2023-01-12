@@ -4,6 +4,7 @@ import TicTacToeCommon.models.UserModel;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import tictacteo_server.data.DatabaseManager;
 import tictacteo_server.data.ResultPacket;
 import tictacteo_server.data.UserDAO;
@@ -17,7 +18,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public ResultPacket findById(String id) throws Exception {
+    public ResultPacket findById(String id) throws SQLException {
         Connection conn = dbm.getConnection();
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Users WHERE Id=?", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         stmt.setString(1, id);
@@ -27,7 +28,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public ResultPacket findByUsernameAndPassword(String name, String password) throws Exception {
+    public ResultPacket findByUsernameAndPassword(String name, String password) throws SQLException {
         Connection conn = dbm.getConnection();
         PreparedStatement stmt = conn.prepareStatement("SELECT * from Users where Username=? And Password=?", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         stmt.setString(1, name);
@@ -37,7 +38,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public String createUser(UserModel user, String password) throws Exception {
+    public String createUser(UserModel user, String password) throws SQLException {
         Connection conn = dbm.getConnection();
         try (PreparedStatement preparedStmt = conn.prepareStatement("INSERT INTO Users (Id, Username, Password ,CreatedAt) VALUES (?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
             preparedStmt.setString(1, user.getId());
@@ -51,6 +52,20 @@ public class UserDAOImpl implements UserDAO {
             }
             return null;
         }
+    }
+
+    @Override
+    public long getUsersCount() throws SQLException {
+        
+        Connection connection = dbm.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT COUNT(*) FROM USER");
+        ResultSet resultSet = preparedStatement.executeQuery();
+        
+        if(resultSet.next()){
+            return resultSet.getLong(1);
+        }
+        
+        return 0;
     }
 
 }
