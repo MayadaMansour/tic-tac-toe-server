@@ -14,8 +14,8 @@ public interface GameHandler {
     
     boolean canProcess(String userId, Serializable data);
 
-    void process(String userId, Serializable data) throws Exception;
+    void process(String userId, Serializable data);
 
-    void stop() throws Exception;
+    void stop();
 
 }

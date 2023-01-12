@@ -6,10 +6,11 @@ package tictacteo_server.handlers;
 
 import TicTacToeCommon.models.UserModel;
 import TicTacToeCommon.models.base.RemoteSendable;
+import java.io.IOException;
 
 public interface ClientHandler{
 
-    void send(RemoteSendable data) throws Exception;
+    void send(RemoteSendable data);
 
     boolean isAuthenticated();
 
@@ -19,5 +20,5 @@ public interface ClientHandler{
 
     UserModel getUser();
 
-    void stop() throws Exception;
+    void stop() throws IOException;
 }

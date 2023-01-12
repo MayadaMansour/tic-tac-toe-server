@@ -12,7 +12,7 @@ public interface GamesManager {
 
     boolean canProcess(String userId, Serializable data);
 
-    void process(String userId, Serializable data) throws Exception;
+    void process(String userId, Serializable data);
     
     void setOngoingHandler(GameHandler handler);
     

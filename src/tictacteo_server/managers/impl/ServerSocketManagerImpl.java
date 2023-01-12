@@ -1,5 +1,7 @@
 package tictacteo_server.managers.impl;
 
+import TicTacToeCommon.utils.MutableObservableValue;
+import TicTacToeCommon.utils.ObservableValue;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,6 +11,8 @@ import java.util.concurrent.Future;
 import tictacteo_server.managers.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import tictacteo_server.data.DatabaseManager;
 import tictacteo_server.data.impl.DerbyDatabaseManager;
 
@@ -19,11 +23,14 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
     private final ClientsManager clientsManager;
     private final DatabaseManager databaseManager;
     private ServerSocket server;
+    private final MutableObservableValue<Boolean> serverStatus = new MutableObservableValue<>(false);
 
     public ServerSocketManagerImpl() throws SQLException {
+
         this.gamesManager = new GamesManagerImpl(this);
-        this.clientsManager = new ClientsManagerImpl(this);
         this.databaseManager = DerbyDatabaseManager.getInstance();
+        this.clientsManager = new ClientsManagerImpl(this, databaseManager);
+
     }
 
     @Override
@@ -61,10 +68,17 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            while (true) {
-                Socket socket = server.accept();
-                clientsManager.accept(socket);
+
+            serverStatus.setValue(true);
+            try {
+                while (true) {
+                    Socket socket = server.accept();
+                    clientsManager.accept(socket);
+                }
+            } finally {
+                serverStatus.setValue(false);
             }
+
         });
     }
 
@@ -77,5 +91,20 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
             databaseManager.stop();
             return 0;
         });
+    }
+
+    @Override
+    public ObservableValue<Long> getActiveUsers() {
+        return clientsManager.getActiveUsers();
+    }
+
+    @Override
+    public ObservableValue<Long> getAllUsers() {
+        return clientsManager.getAllUsers();
+    }
+
+    @Override
+    public ObservableValue<Boolean> getServerStatus() {
+        return this.serverStatus;
     }
 }

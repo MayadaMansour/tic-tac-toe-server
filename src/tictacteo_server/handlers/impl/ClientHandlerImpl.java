@@ -78,7 +78,7 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
             // Check if the user account is in the database or not.
             // If the result set is empty (The client hasn't signed up before)
             if (!resultSet.next()) {
-                sendImpl(new LoginResponse(false));
+                send(new LoginResponse(false));
                 resultPacket.close();
             } else { // already signed up before
                 try {
@@ -88,11 +88,11 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
                     throw e;
                 }
                 this.resultPacket = resultPacket;
-                sendImpl(new LoginResponse(true, userModel)); // TODO wrap the user model inside the login response
-                serverSocketManager.getClientsManager().authenticateHandler(resultSet.getString(1), this);
+                send(new LoginResponse(true, userModel)); // TODO wrap the user model inside the login response
+                serverSocketManager.getClientsManager().authenticateHandler(false, resultSet.getString(1), this);
             }
         } catch (SQLException e) {
-            sendImpl(new LoginResponse(false)); // TODO wrap the user model inside the login response
+            send(new LoginResponse(false)); // TODO wrap the user model inside the login response
         }
     }
 
@@ -115,17 +115,16 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
                 throw e;
             }
             this.resultPacket = resultPacket;
-            serverSocketManager.getClientsManager().authenticateHandler(userModel.getId(), this);
-            sendImpl(new SignUpResponse(true, this.userModel));
+            serverSocketManager.getClientsManager().authenticateHandler(true, userModel.getId(), this);
+            send(new SignUpResponse(true, this.userModel));
         } catch (Exception ex) { // Unable to access the database to retrieve the user's data
-            sendImpl(new SignUpResponse(false));
+            send(new SignUpResponse(false));
             // once a SignUpResponse with a failure status is sent. Terminate the method.
         }
     }
 
     private void handleOnlinePlayersRequest() {
-
-        sendImpl(new OnlinePlayersResponse(true, serverSocketManager.getClientsManager().getAvailablePlayers())); // If unable to send an OnlinePlayersResponse.
+        send(new OnlinePlayersResponse(true, serverSocketManager.getClientsManager().getAvailablePlayers())); // If unable to send an OnlinePlayersResponse.
     }
 
     /**
@@ -164,11 +163,7 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
      * Sends Serializable messages to the client
      */
     @Override
-    public void send(RemoteSendable data) throws IOException {
-        sendImpl(data);
-    }
-
-    private void sendImpl(RemoteSendable data) {
+    public void send(RemoteSendable data) {
         serverSocketManager.submitJob(() -> {
             try {
                 new RemoteMessage(data).writeInto(objectOutputStream);
@@ -195,7 +190,7 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() throws IOException {
         socket.close();
     }
 
