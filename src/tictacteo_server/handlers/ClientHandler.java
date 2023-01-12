@@ -5,11 +5,11 @@
 package tictacteo_server.handlers;
 
 import TicTacToeCommon.models.UserModel;
-import java.io.Serializable;
+import TicTacToeCommon.models.base.RemoteSendable;
 
 public interface ClientHandler {
 
-    void send(Serializable data) throws Exception;
+    void send(RemoteSendable data) throws Exception;
 
     boolean isAuthenticated();
 

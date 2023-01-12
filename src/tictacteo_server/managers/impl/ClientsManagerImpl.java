@@ -5,11 +5,15 @@
 package tictacteo_server.managers.impl;
 
 import TicTacToeCommon.models.UserModel;
+import TicTacToeCommon.models.base.RemoteSendable;
+import TicTacToeCommon.models.requests.GameWithdrawRequest;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import tictacteo_server.handlers.ClientHandler;
 import tictacteo_server.managers.*;
@@ -31,7 +35,7 @@ public class ClientsManagerImpl implements ClientsManager {
     }
 
     @Override
-    public void send(String userId, Serializable data) throws Exception {
+    public void send(String userId, RemoteSendable data) throws Exception {
         ClientHandler client = authClients.get(userId);
         if (client != null) {
             client.send(data);
@@ -75,8 +79,13 @@ public class ClientsManagerImpl implements ClientsManager {
     @Override
     public void unathenticateHandler(String userId) {
         authClients.remove(userId);
+        try {
+            socketManager.getGamesManager().process(userId, new GameWithdrawRequest());
+        } catch (Exception ex) {
+            Logger.getLogger(ClientsManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-
+ 
     @Override
     public void removeHandler(ClientHandler handler) {
         activeClients.remove(handler);
