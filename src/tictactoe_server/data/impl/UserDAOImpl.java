@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import tictactoe_server.data.DatabaseManager;
 import tictactoe_server.data.ResultPacket;
 import tictactoe_server.data.UserDAO;
@@ -40,7 +41,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public String createUser(UserModel user, String password) throws SQLException {
         Connection conn = dbm.getConnection();
-        try (PreparedStatement preparedStmt = conn.prepareStatement("INSERT INTO Users (Id, Username, Password ,CreatedAt) VALUES (?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement preparedStmt = conn.prepareStatement("INSERT INTO Users (Id, Username, Password ,CreatedAt) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
             preparedStmt.setString(1, user.getId());
             preparedStmt.setString(2, user.getName());
             preparedStmt.setString(3, password);
@@ -48,7 +49,7 @@ public class UserDAOImpl implements UserDAO {
             preparedStmt.executeUpdate();
             ResultSet keys = preparedStmt.getGeneratedKeys();
             if (keys.next()) {
-                return keys.getString("id");
+                return keys.getString(1);
             }
             return null;
         }

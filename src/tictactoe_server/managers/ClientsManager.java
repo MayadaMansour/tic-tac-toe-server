@@ -7,8 +7,11 @@ package tictactoe_server.managers;
 import TicTacToeCommon.models.UserModel;
 import TicTacToeCommon.models.base.RemoteSendable;
 import TicTacToeCommon.utils.ObservableValue;
+import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 import tictactoe_server.handlers.ClientHandler;
 
 public interface ClientsManager {
@@ -17,7 +20,7 @@ public interface ClientsManager {
 
     ObservableValue<Long> getAllUsers();
 
-    void accept(Socket socket);
+    void accept(Socket socket) throws IOException, SQLException;
 
     void send(String userId, RemoteSendable data);
 
@@ -27,7 +30,7 @@ public interface ClientsManager {
 
     void setIsPlaying(String userId, boolean isPlaying);
 
-    ArrayList<UserModel> getAvailablePlayers();
+    Stream<UserModel> getAvailablePlayers();
 
     UserModel getUser(String userId);
 

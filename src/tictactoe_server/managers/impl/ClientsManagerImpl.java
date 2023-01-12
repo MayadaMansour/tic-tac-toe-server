@@ -9,6 +9,7 @@ import TicTacToeCommon.models.base.RemoteSendable;
 import TicTacToeCommon.models.requests.GameWithdrawRequest;
 import TicTacToeCommon.utils.MutableObservableValue;
 import TicTacToeCommon.utils.ObservableValue;
+import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -17,10 +18,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import tictactoe_server.data.DatabaseManager;
 import tictactoe_server.data.UserDAO;
 import tictactoe_server.data.impl.UserDAOImpl;
 import tictactoe_server.handlers.ClientHandler;
+import tictactoe_server.handlers.impl.ClientHandlerImpl;
 import tictactoe_server.managers.*;
 
 public class ClientsManagerImpl implements ClientsManager {
@@ -39,8 +42,8 @@ public class ClientsManagerImpl implements ClientsManager {
     }
 
     @Override
-    public void accept(Socket socket) {
-        ClientHandler client = null;
+    public void accept(Socket socket) throws IOException, SQLException {
+        ClientHandler client = new ClientHandlerImpl(socketManager, socket);
         activeClients.add(client);
     }
 
@@ -65,11 +68,10 @@ public class ClientsManagerImpl implements ClientsManager {
     }
 
     @Override
-    public ArrayList<UserModel> getAvailablePlayers() {
+    public Stream<UserModel> getAvailablePlayers() {
         return authClients.values().stream()
                 .filter((e) -> !e.isPlaying())
-                .map((e) -> e.getUser())
-                .collect(Collectors.toCollection(() -> new ArrayList<>()));
+                .map((e) -> e.getUser());
     }
 
     @Override

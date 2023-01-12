@@ -36,7 +36,7 @@ public class GameHandlerImpl implements GameHandler {
     private final TicTacToeEngine engine;
     private final GameModel gameModel;
 
-    public GameHandlerImpl(String player1Id, String player2Id, ServerSocketManager serverSocketManager) throws Exception {
+    public GameHandlerImpl(String player1Id, String player2Id, ServerSocketManager serverSocketManager) {
         this.players = Arrays.asList(player1Id, player2Id);
         this.serverSocketManager = serverSocketManager;
         UserModel player1 = serverSocketManager.getClientsManager().getUser(player1Id);

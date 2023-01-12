@@ -17,60 +17,60 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import tictactoe_server.data.DatabaseManager;
 import tictactoe_server.data.ResultPacket;
 import tictactoe_server.data.impl.UserDAOImpl;
 import tictactoe_server.handlers.ClientHandler;
 import tictactoe_server.managers.ServerSocketManager;
 import tictactoe_server.mappers.EntityMapper;
+import tictactoe_server.mappers.impl.UserMapper;
 
-class ClientHandlerImpl implements ClientHandler, Runnable {
+public class ClientHandlerImpl implements ClientHandler, Runnable {
 
     private final ServerSocketManager serverSocketManager;
     private final Socket socket;
     private final ObjectOutputStream objectOutputStream;
     private final ObjectInputStream objectInputStream;
     private final DatabaseManager databaseManager;
-    private final Connection connection;
     private final UserDAOImpl userDao;
+    private final EntityMapper<UserModel> entityMapper;
     private ResultPacket resultPacket;
     private UserModel userModel;
-    private EntityMapper<UserModel> entityMapper;
     private boolean isPlaying;
 
-    public ClientHandlerImpl(ServerSocketManager serverSocketManager, Socket socket, DatabaseManager databaseManager)
+    public ClientHandlerImpl(ServerSocketManager serverSocketManager, Socket socket)
             throws IOException, SQLException {
         this.serverSocketManager = serverSocketManager;
         this.socket = socket;
-        this.databaseManager = databaseManager;
+        this.databaseManager = serverSocketManager.getDatabaseManager();
         this.objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         this.objectInputStream = new ObjectInputStream(socket.getInputStream());
-        this.connection = databaseManager.getConnection();
         this.userDao = new UserDAOImpl(databaseManager);
+        this.entityMapper = new UserMapper();
         // Submit yourself in the thread pool
         serverSocketManager.submitJob(this);
     }
 
     public void handleMessage(RemoteMessage remoteMessage) {
         if (remoteMessage.getMessage(LoginRequest.class) != null) {
-            handleLoginMessage(remoteMessage);
+            handleLoginMessage((LoginRequest) remoteMessage.getMessage());
         } else if (remoteMessage.getMessage(SignUpRequest.class) != null) {
-            handleSignUpRequest(remoteMessage);
+            handleSignUpRequest((SignUpRequest) remoteMessage.getMessage());
         } else if (remoteMessage.getMessage(OnlinePlayersRequest.class) != null) {
             handleOnlinePlayersRequest();
         }
     }
 
-    private void handleLoginMessage(RemoteMessage remoteMessage) {
+    private void handleLoginMessage(LoginRequest loginRequest) {
         try {
-            LoginRequest loginRequest = (LoginRequest) remoteMessage.getMessage();
             // In the case of multiple threads accessing this method
             ResultPacket resultPacket = userDao.
                     findByUsernameAndPassword(loginRequest.getUsername(), loginRequest.getPassword());
@@ -82,34 +82,35 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
                 resultPacket.close();
             } else { // already signed up before
                 try {
-                    userModel = entityMapper.mapToEntity(resultSet);
+                    this.userModel = entityMapper.mapToEntity(resultSet);
                 } catch (SQLException e) {
                     resultPacket.close();
                     throw e;
                 }
                 this.resultPacket = resultPacket;
-                send(new LoginResponse(true, userModel)); // TODO wrap the user model inside the login response
+                send(new LoginResponse(true, userModel));
                 serverSocketManager.getClientsManager().authenticateHandler(false, resultSet.getString(1), this);
             }
         } catch (SQLException e) {
-            send(new LoginResponse(false)); // TODO wrap the user model inside the login response
+            send(new LoginResponse(false));
+            Logger.getLogger(ClientHandlerImpl.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
-    private void handleSignUpRequest(RemoteMessage remoteMessage) {
+    private void handleSignUpRequest(SignUpRequest signUpRequest) {
         /*
             Check if the user has signed up before by getting a ResultSet.
          */
-        SignUpRequest signUpRequest = (SignUpRequest) remoteMessage.getMessage();
         try {
             UserModel userModel = new UserModel(UUID.randomUUID().toString(), signUpRequest.getUserName(), null, new Date().getTime());
-            String insertedId = userDao.createUser(userModel, signUpRequest.getPassword());
-            if (insertedId == null) {
-                throw new Exception();
-            }
-            ResultPacket resultPacket = userDao.findById(insertedId);
+            userDao.createUser(userModel, signUpRequest.getPassword());
+            ResultPacket resultPacket = userDao.findById(userModel.getId());
             try {
-                this.userModel = entityMapper.mapToEntity(resultPacket.getResultSet());
+                if (resultPacket.getResultSet().next()) {
+                    this.userModel = entityMapper.mapToEntity(resultPacket.getResultSet());
+                } else {
+                    throw new SQLException();
+                }
             } catch (SQLException e) {
                 resultPacket.close();
                 throw e;
@@ -117,14 +118,23 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
             this.resultPacket = resultPacket;
             serverSocketManager.getClientsManager().authenticateHandler(true, userModel.getId(), this);
             send(new SignUpResponse(true, this.userModel));
-        } catch (Exception ex) { // Unable to access the database to retrieve the user's data
+        } catch (SQLException ex) { // Unable to access the database to retrieve the user's data
             send(new SignUpResponse(false));
+            Logger.getLogger(ClientHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
             // once a SignUpResponse with a failure status is sent. Terminate the method.
         }
     }
 
     private void handleOnlinePlayersRequest() {
-        send(new OnlinePlayersResponse(true, serverSocketManager.getClientsManager().getAvailablePlayers())); // If unable to send an OnlinePlayersResponse.
+        String userId = userModel == null ? null : userModel.getId();
+        if (userId != null) {
+            ArrayList<UserModel> players = serverSocketManager.getClientsManager().getAvailablePlayers()
+                    .filter((e) -> !e.getId().equals(userId))
+                    .collect(Collectors.toCollection(() -> new ArrayList<>()));
+            send(new OnlinePlayersResponse(true, players)); // If unable to send an OnlinePlayersResponse.
+        } else {
+            send(new OnlinePlayersResponse(false));
+        }
     }
 
     /**
@@ -133,12 +143,11 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
     @Override
     public void run() {
 
-        try (Socket socket = this.socket;
-                ObjectInputStream in = this.objectInputStream;
-                ObjectOutputStream out = this.objectOutputStream) {
+        try {
             while (true) {
-                RemoteMessage message = RemoteMessage.readFrom(in);
+                RemoteMessage message = RemoteMessage.readFrom(objectInputStream);
                 serverSocketManager.submitJob(() -> {
+                    Logger.getLogger(ClientHandlerImpl.class.getName()).info("Got message " + message.getMessage());
                     handleMessage(message);
                 });
             }
@@ -156,6 +165,13 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
                     Logger.getLogger(ClientHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    Logger.getLogger(ClientHandlerImpl.class.getName()).log(Level.SEVERE, null, e);
+                }
+            }
         }
     }
 
@@ -166,7 +182,9 @@ class ClientHandlerImpl implements ClientHandler, Runnable {
     public void send(RemoteSendable data) {
         serverSocketManager.submitJob(() -> {
             try {
+                Logger.getLogger(ClientHandlerImpl.class.getName()).info("Sending message " + data);
                 new RemoteMessage(data).writeInto(objectOutputStream);
+                Logger.getLogger(ClientHandlerImpl.class.getName()).info("Message sent " + data);
             } catch (IOException ex) {
                 Logger.getLogger(ClientHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
             }

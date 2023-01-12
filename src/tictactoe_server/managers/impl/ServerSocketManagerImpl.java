@@ -66,9 +66,9 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
                 server = new ServerSocket(port);
                 databaseManager.start();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, e);
+                return 0;
             }
-
             serverStatus.setValue(true);
             try {
                 while (true) {
@@ -77,8 +77,9 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
                 }
             } finally {
                 serverStatus.setValue(false);
+                server.close();
+                server = null;
             }
-
         });
     }
 

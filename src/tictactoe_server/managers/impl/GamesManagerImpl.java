@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import tictactoe_server.handlers.GameHandler;
+import tictactoe_server.handlers.impl.GameHandlerImpl;
 import tictactoe_server.managers.ClientsManager;
 import tictactoe_server.managers.GamesManager;
 import tictactoe_server.managers.ServerSocketManager;
@@ -82,7 +83,7 @@ public class GamesManagerImpl implements GamesManager {
             } else if (canPlay(player1Id, answer.getOpponent()) && haveActivePendingRequest(player1Id, player2Id)) {
                 removeUsersPendingRequests(player1Id, player2Id);
                 clientManager.send(player2Id, new StartGameResponse(true, true));
-                GameHandler gameHandler = null; // TODO create
+                GameHandler gameHandler = new GameHandlerImpl(player1Id, player2Id, serverSocketManager);
                 gameHandlers.add(gameHandler);
             } else {
                 clientManager.send(player1Id, new StartGameResponse(false));
