@@ -85,7 +85,15 @@ public class ClientsManagerImpl implements ClientsManager {
             Logger.getLogger(ClientsManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
- 
+
+    @Override
+    public void setIsPlaying(String userId, boolean isPlaying) {
+        ClientHandler handler = authClients.get(userId);
+        if (handler != null) {
+            handler.setIsPlaying(isPlaying);
+        }
+    }
+
     @Override
     public void removeHandler(ClientHandler handler) {
         activeClients.remove(handler);

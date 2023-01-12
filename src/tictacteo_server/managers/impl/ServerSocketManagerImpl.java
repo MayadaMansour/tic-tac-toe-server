@@ -40,7 +40,7 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
     public DatabaseManager getDatabaseManager() {
         return databaseManager;
     }
-    
+
     @Override
     public <T> Future<T> submitJob(Callable<T> job) {
         return executorService.submit(job);
@@ -67,7 +67,6 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
             }
         });
     }
-    
 
     @Override
     public Future<?> stop() throws Exception {
@@ -79,5 +78,4 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
             return 0;
         });
     }
-
 }

@@ -21,6 +21,8 @@ public interface ClientsManager {
     
     boolean isOnline(String userId);
     
+    void setIsPlaying(String userId, boolean isPlaying);
+    
     ArrayList<UserModel> getAvailablePlayers();
     
     UserModel getUser(String userId);

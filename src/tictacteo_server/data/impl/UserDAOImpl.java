@@ -4,6 +4,7 @@ import TicTacToeCommon.models.UserModel;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import tictacteo_server.data.DatabaseManager;
 import tictacteo_server.data.ResultPacket;
 import tictacteo_server.data.UserDAO;
@@ -27,7 +28,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public ResultPacket findByUsernameAndPassword(String name, String password) throws Exception {
+    public ResultPacket findByUsernameAndPassword(String name, String password) throws SQLException {
         Connection conn = dbm.getConnection();
         PreparedStatement stmt = conn.prepareStatement("SELECT * from Users where Username=? And Password=?", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         stmt.setString(1, name);

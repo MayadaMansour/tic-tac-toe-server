@@ -50,9 +50,12 @@ public class GameHandlerImpl implements GameHandler {
         serverSocketManager.getClientsManager().send(player1.getId(),
                 new GameEvent.Started(gameModel.getGameId(), gameModel,
                         player2, engine.getLeague(player1.getId())));
+        serverSocketManager.getClientsManager().setIsPlaying(player1.getId(), true);
         serverSocketManager.getClientsManager().send(player2.getId(),
                 new GameEvent.Started(gameModel.getGameId(), gameModel,
                         player1, engine.getLeague(player2.getId())));
+        serverSocketManager.getClientsManager().setIsPlaying(player2.getId(), true);
+
     }
 
     private void broadcast(GameEvent event) throws Exception {
@@ -149,6 +152,9 @@ public class GameHandlerImpl implements GameHandler {
     }
 
     private void remove() throws Exception {
+        for (String userId : players) {
+            serverSocketManager.getClientsManager().setIsPlaying(userId, false);
+        }
         serverSocketManager.getGamesManager().removeHandler(this);
         stop();
     }

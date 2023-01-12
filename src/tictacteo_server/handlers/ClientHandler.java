@@ -7,13 +7,15 @@ package tictacteo_server.handlers;
 import TicTacToeCommon.models.UserModel;
 import TicTacToeCommon.models.base.RemoteSendable;
 
-public interface ClientHandler {
+public interface ClientHandler{
 
     void send(RemoteSendable data) throws Exception;
 
     boolean isAuthenticated();
 
     boolean isPlaying();
+    
+    void setIsPlaying(boolean isPlaying);
 
     UserModel getUser();
 
