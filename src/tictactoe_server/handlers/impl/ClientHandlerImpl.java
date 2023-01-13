@@ -60,12 +60,18 @@ public class ClientHandlerImpl implements ClientHandler, Runnable {
     }
 
     public void handleMessage(RemoteMessage remoteMessage) {
-        if (remoteMessage.getMessage(LoginRequest.class) != null) {
-            handleLoginMessage((LoginRequest) remoteMessage.getMessage());
-        } else if (remoteMessage.getMessage(SignUpRequest.class) != null) {
-            handleSignUpRequest((SignUpRequest) remoteMessage.getMessage());
-        } else if (remoteMessage.getMessage(OnlinePlayersRequest.class) != null) {
-            handleOnlinePlayersRequest();
+        try {
+            if (remoteMessage.getMessage(LoginRequest.class) != null) {
+                handleLoginMessage((LoginRequest) remoteMessage.getMessage());
+            } else if (remoteMessage.getMessage(SignUpRequest.class) != null) {
+                handleSignUpRequest((SignUpRequest) remoteMessage.getMessage());
+            } else if (remoteMessage.getMessage(OnlinePlayersRequest.class) != null) {
+                handleOnlinePlayersRequest();
+            } else if (userModel != null) {
+                serverSocketManager.getGamesManager().process(userModel.getId(), remoteMessage.getMessage());
+            }
+        } catch (Exception e) {
+            Logger.getLogger(ClientHandlerImpl.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
