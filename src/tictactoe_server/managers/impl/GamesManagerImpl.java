@@ -9,6 +9,7 @@ import TicTacToeCommon.models.GameOfferAnswer;
 import TicTacToeCommon.models.requests.GameCancelRequest;
 import TicTacToeCommon.models.requests.GameMoveRequest;
 import TicTacToeCommon.models.requests.GameWithdrawRequest;
+import TicTacToeCommon.models.requests.JoinGameRequest;
 import TicTacToeCommon.models.requests.StartGameRequest;
 import TicTacToeCommon.models.responses.GameCancelResponse;
 import TicTacToeCommon.models.responses.JoinGameResponse;
@@ -68,7 +69,7 @@ public class GamesManagerImpl implements GamesManager {
                 PendingRequest request = new PendingRequest(player1Id, player2.getId());
                 pendingRequests.add(request);
                 clientManager.send(player2.getId(),
-                        new StartGameRequest(clientManager.getUser(player1Id)));
+                        new JoinGameRequest(clientManager.getUser(player1Id)));
             } else {
                 clientManager.send(player1Id, new StartGameResponse(false));
             }

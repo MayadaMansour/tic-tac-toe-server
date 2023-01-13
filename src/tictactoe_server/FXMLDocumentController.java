@@ -46,18 +46,19 @@ public class FXMLDocumentController implements Initializable {
         categoryAxis.setLabel("bars");
         NumberAxis.setLabel("Value");
 
+        series.getData().add(new XYChart.Data("totalUsers", serverSocketManager.getAllUsers().getValue()));
+        series.getData().add(new XYChart.Data("activeClients", serverSocketManager.getActiveUsers().getValue()));
+
         serverSocketManager.getAllUsers().addListener((all) -> {
             Platform.runLater(() -> {
                 series.getData().get(0).setYValue(all);
             });
-            
         });
         
         serverSocketManager.getActiveUsers().addListener((active) -> {
             Platform.runLater(() -> {
                 series.getData().get(1).setYValue(active);
             });
-            
         });
         
         serverSocketManager.getServerStatus().addListener((isActive) -> {
@@ -69,9 +70,6 @@ public class FXMLDocumentController implements Initializable {
                 }
             });
         });
-        
-        series.getData().add(new XYChart.Data("totalUsers", 0));
-        series.getData().add(new XYChart.Data("activeClients", 0));
 
         barChart.getData().add(series);
 
