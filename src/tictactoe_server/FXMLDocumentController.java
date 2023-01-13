@@ -14,7 +14,7 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import tictactoe_server.managers.ServerSocketManager;
 
 /**
@@ -26,10 +26,10 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Button StartButton;
     @FXML
-    private AnchorPane anchorPane;
-    
+    private BorderPane borderPane;
+
     private final ServerSocketManager serverSocketManager;
-    
+
     private final XYChart.Series<String, Number> series = new XYChart.Series<>();
 
     public FXMLDocumentController(ServerSocketManager serverSocketManager) {
@@ -43,24 +43,24 @@ public class FXMLDocumentController implements Initializable {
         NumberAxis NumberAxis = new NumberAxis();
         BarChart barChart = new BarChart<>(categoryAxis, NumberAxis);
 
-        categoryAxis.setLabel("bars");
-        NumberAxis.setLabel("Value");
+        categoryAxis.setLabel("Statistic");
+        NumberAxis.setLabel("Number");
 
-        series.getData().add(new XYChart.Data("totalUsers", serverSocketManager.getAllUsers().getValue()));
-        series.getData().add(new XYChart.Data("activeClients", serverSocketManager.getActiveUsers().getValue()));
+        series.getData().add(new XYChart.Data("Total Users", serverSocketManager.getAllUsers().getValue()));
+        series.getData().add(new XYChart.Data("Active Clients", serverSocketManager.getActiveUsers().getValue()));
 
         serverSocketManager.getAllUsers().addListener((all) -> {
             Platform.runLater(() -> {
                 series.getData().get(0).setYValue(all);
             });
         });
-        
+
         serverSocketManager.getActiveUsers().addListener((active) -> {
             Platform.runLater(() -> {
                 series.getData().get(1).setYValue(active);
             });
         });
-        
+
         serverSocketManager.getServerStatus().addListener((isActive) -> {
             Platform.runLater(() -> {
                 if (isActive) {
@@ -73,12 +73,7 @@ public class FXMLDocumentController implements Initializable {
 
         barChart.getData().add(series);
 
-        barChart.setMaxHeight(400);
-        barChart.setMaxWidth(400);
-        barChart.setLayoutX(140);
-        barChart.setLayoutY(0);
-
-        anchorPane.getChildren().add(barChart);
+        borderPane.setCenter(barChart);
 
         StartButton.setOnAction((event) -> {
             if (serverSocketManager.getServerStatus().getValue()) {

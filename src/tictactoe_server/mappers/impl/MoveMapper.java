@@ -23,7 +23,7 @@ public class MoveMapper implements EntityMapper<MoveModel> {
         moveModel.setId(resultSet.getString("Id"));
         moveModel.setGameId(resultSet.getString("GameId"));
         moveModel.setPlayerId(resultSet.getString("PlayerId"));
-        moveModel.setSpacePosition(resultSet.getByte("SpacePosition"));
+        moveModel.setSpacePosition(resultSet.getInt("SpacePosition"));
         moveModel.setCreatedAt(resultSet.getLong("CreatedAt"));
         return moveModel;
     }
@@ -33,7 +33,7 @@ public class MoveMapper implements EntityMapper<MoveModel> {
         resultSet.updateString("Id", entity.getId());
         resultSet.updateString("PlayerId", entity.getPlayerId());
         resultSet.updateString("GameId", entity.getGameId());
-        resultSet.updateByte("SpacePosition", entity.getSpacePosition());
+        resultSet.updateInt("SpacePosition", entity.getSpacePosition());
         resultSet.updateLong("CreatedAt", entity.getCreatedAt());
     }
 

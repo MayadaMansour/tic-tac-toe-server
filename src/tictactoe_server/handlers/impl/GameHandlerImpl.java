@@ -27,6 +27,7 @@ import tictactoe_server.handlers.GameHandler;
 import tictactoe_server.managers.ServerSocketManager;
 
 import static TicTacToeCommon.services.engine.TicTacToeEngine.GameResult.*;
+import TicTacToeCommon.services.engine.TicTacToeEngine.InvalidMoveException;
 
 public class GameHandlerImpl implements GameHandler {
 
@@ -55,6 +56,7 @@ public class GameHandlerImpl implements GameHandler {
                 new GameEvent.Started(gameModel.getGameId(), gameModel,
                         player1, engine.getLeague(player2.getId())));
         serverSocketManager.getClientsManager().setIsPlaying(player2.getId(), true);
+        serverSocketManager.getGamesManager().setOngoingHandler(this);
 
     }
 
@@ -108,6 +110,7 @@ public class GameHandlerImpl implements GameHandler {
             sendToOpponent(userId, new GameEvent.Withdraw(userId));
             send(userId, new GameWithdrawResponse(true, getGameId()));
             remove();
+            stop();
         } else if (data instanceof GameMoveRequest) {
             GameMoveRequest moveRequest = (GameMoveRequest) data;
             try {
@@ -117,16 +120,15 @@ public class GameHandlerImpl implements GameHandler {
                         getGameId(), moveRequest.getMove(),
                         new Date().getTime());
                 moves.add(move);
-                if (!checkEndGame(result)) {
-                    broadcast(new GameEvent.Moved(getGameId(), userId, move));
-                }
-            } catch (Exception e) {
+                broadcast(new GameEvent.Moved(getGameId(), userId, move));
+                checkEndGame(result);
+            } catch (InvalidMoveException e) {
                 send(userId, new GameMoveResponse(true, false));
             }
         }
     }
 
-    private boolean checkEndGame(TicTacToeEngine.GameResult result) {
+    private boolean checkEndGame(TicTacToeEngine.GameResult result) throws InvalidMoveException {
         if (result != ONGOING) {
             UserModel cross = engine.getPlayer(League.Cross);
             UserModel nougth = engine.getPlayer(League.Nought);
@@ -135,7 +137,6 @@ public class GameHandlerImpl implements GameHandler {
                     send(cross.getId(), new GameEvent.Won(getGameId()));
                     send(nougth.getId(), new GameEvent.Lost(getGameId()));
                     break;
-                default:
                 case NOUGHT_WINS:
                     send(nougth.getId(), new GameEvent.Won(getGameId()));
                     send(cross.getId(), new GameEvent.Lost(getGameId()));
@@ -156,11 +157,10 @@ public class GameHandlerImpl implements GameHandler {
             serverSocketManager.getClientsManager().setIsPlaying(userId, false);
         }
         serverSocketManager.getGamesManager().removeHandler(this);
-        stop();
     }
 
     @Override
     public void stop() {
-        broadcast(new GameEvent.Ended(gameModel.getGameId()));
+        broadcast(new GameEvent.Ended(getGameId()));
     }
 }
