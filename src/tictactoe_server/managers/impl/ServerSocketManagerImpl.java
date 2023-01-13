@@ -59,7 +59,7 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
     }
 
     @Override
-    public Future<?> start() throws Exception {
+    public Future<?> start() {
         return submitJob(() -> {
             int port = 1000;
             try {
@@ -84,7 +84,7 @@ public class ServerSocketManagerImpl implements ServerSocketManager {
     }
 
     @Override
-    public Future<?> stop() throws Exception {
+    public Future<?> stop() {
         return submitJob(() -> {
             server.close();
             gamesManager.stop();

@@ -6,29 +6,89 @@ package tictactoe_server;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
+import javafx.scene.layout.AnchorPane;
+import tictactoe_server.managers.ServerSocketManager;
 
 /**
  *
  * @author m-essam
  */
 public class FXMLDocumentController implements Initializable {
-    
+
     @FXML
-    private Label label;
-    
+    private Button StartButton;
     @FXML
-    private void handleButtonAction(ActionEvent event) {
-        System.out.println("You clicked me!");
-        label.setText("Hello World!");
+    private AnchorPane anchorPane;
+    
+    private final ServerSocketManager serverSocketManager;
+    
+    private final XYChart.Series<String, Number> series = new XYChart.Series<>();
+
+    public FXMLDocumentController(ServerSocketManager serverSocketManager) {
+        this.serverSocketManager = serverSocketManager;
+        series.setName("Users");
     }
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
-    
+        CategoryAxis categoryAxis = new CategoryAxis();
+        NumberAxis NumberAxis = new NumberAxis();
+        BarChart barChart = new BarChart<>(categoryAxis, NumberAxis);
+
+        categoryAxis.setLabel("bars");
+        NumberAxis.setLabel("Value");
+
+        serverSocketManager.getAllUsers().addListener((all) -> {
+            Platform.runLater(() -> {
+                series.getData().get(0).setYValue(all);
+            });
+            
+        });
+        
+        serverSocketManager.getActiveUsers().addListener((active) -> {
+            Platform.runLater(() -> {
+                series.getData().get(1).setYValue(active);
+            });
+            
+        });
+        
+        serverSocketManager.getServerStatus().addListener((isActive) -> {
+            Platform.runLater(() -> {
+                if (isActive) {
+                    StartButton.setText("Stop");
+                } else {
+                    StartButton.setText("Start");
+                }
+            });
+        });
+        
+        series.getData().add(new XYChart.Data("totalUsers", 0));
+        series.getData().add(new XYChart.Data("activeClients", 0));
+
+        barChart.getData().add(series);
+
+        barChart.setMaxHeight(400);
+        barChart.setMaxWidth(400);
+        barChart.setLayoutX(140);
+        barChart.setLayoutY(0);
+
+        anchorPane.getChildren().add(barChart);
+
+        StartButton.setOnAction((event) -> {
+            if (serverSocketManager.getServerStatus().getValue()) {
+                serverSocketManager.stop();
+            } else {
+                serverSocketManager.start();
+            }
+        });
+    }
+
 }

@@ -23,8 +23,8 @@ public interface ServerSocketManager {
 
     Future<?> submitJob(Runnable job);
 
-    Future<?> start() throws Exception;
+    Future<?> start();
 
-    Future<?> stop() throws Exception;
+    Future<?> stop();
 
 }
