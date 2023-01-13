@@ -28,7 +28,6 @@ import tictactoe_server.managers.ServerSocketManager;
 
 import static TicTacToeCommon.services.engine.TicTacToeEngine.GameResult.*;
 import TicTacToeCommon.services.engine.TicTacToeEngine.InvalidMoveException;
-import java.security.InvalidParameterException;
 
 public class GameHandlerImpl implements GameHandler {
 
@@ -111,6 +110,7 @@ public class GameHandlerImpl implements GameHandler {
             sendToOpponent(userId, new GameEvent.Withdraw(userId));
             send(userId, new GameWithdrawResponse(true, getGameId()));
             remove();
+            stop();
         } else if (data instanceof GameMoveRequest) {
             GameMoveRequest moveRequest = (GameMoveRequest) data;
             try {
@@ -157,11 +157,10 @@ public class GameHandlerImpl implements GameHandler {
             serverSocketManager.getClientsManager().setIsPlaying(userId, false);
         }
         serverSocketManager.getGamesManager().removeHandler(this);
-        stop();
     }
 
     @Override
     public void stop() {
-        broadcast(new GameEvent.Ended(gameModel.getGameId()));
+        broadcast(new GameEvent.Ended(getGameId()));
     }
 }
