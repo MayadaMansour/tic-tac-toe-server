@@ -48,7 +48,7 @@ public class FXMLDocumentController implements Initializable {
 
         series.getData().add(new XYChart.Data("totalUsers", serverSocketManager.getAllUsers().getValue()));
         series.getData().add(new XYChart.Data("activeClients", serverSocketManager.getActiveUsers().getValue()));
-        
+
         serverSocketManager.getAllUsers().addListener((all) -> {
             Platform.runLater(() -> {
                 series.getData().get(0).setYValue(all);
