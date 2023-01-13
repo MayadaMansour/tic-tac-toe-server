@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import tictactoe_server.data.DatabaseManager;
 import tictactoe_server.data.UserDAO;
@@ -85,21 +84,23 @@ public class ClientsManagerImpl implements ClientsManager {
 
     @Override
     public void authenticateHandler(boolean isSignup, String userId, ClientHandler handler) {
-        authClients.put(userId, handler);
-        onlineUsers.setValue(onlineUsers.getValue() + 1);
-        if (isSignup) {
-            totalUsers.setValue(totalUsers.getValue() + 1);
+        if (authClients.put(userId, handler) == null) {
+            onlineUsers.setValue(onlineUsers.getValue() + 1);
+            if (isSignup) {
+                totalUsers.setValue(totalUsers.getValue() + 1);
+            }
         }
     }
 
     @Override
     public void unathenticateHandler(String userId) {
-        authClients.remove(userId);
-        onlineUsers.setValue(onlineUsers.getValue() - 1);
-        try {
-            socketManager.getGamesManager().process(userId, new GameWithdrawRequest());
-        } catch (Exception ex) {
-            Logger.getLogger(ClientsManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        if (authClients.remove(userId) != null) {
+            onlineUsers.setValue(onlineUsers.getValue() - 1);
+            try {
+                socketManager.getGamesManager().process(userId, new GameWithdrawRequest());
+            } catch (Exception ex) {
+                Logger.getLogger(ClientsManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
