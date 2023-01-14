@@ -108,6 +108,9 @@ public class ClientHandlerImpl implements ClientHandler, Runnable {
             Check if the user has signed up before by getting a ResultSet.
          */
         try {
+            if (signUpRequest.getPassword() == null || signUpRequest.getPassword().length() < 8) {
+                throw new SQLException("Wrong password length");
+            } 
             UserModel userModel = new UserModel(UUID.randomUUID().toString(), signUpRequest.getUserName(), null, new Date().getTime());
             userDao.createUser(userModel, signUpRequest.getPassword());
             ResultPacket resultPacket = userDao.findById(userModel.getId());
